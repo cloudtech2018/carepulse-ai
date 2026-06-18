@@ -3,6 +3,8 @@ import CoreMotion
 import Foundation
 import SwiftUI
 
+private let defaultBackendURL = "http://10.104.40.61:8765"
+
 struct ContentView: View {
     @EnvironmentObject private var session: AppSession
     @State private var route: AuthRoute = .onboarding
@@ -46,7 +48,13 @@ final class AppSession: ObservableObject {
     }
 
     init() {
-        backendURL = UserDefaults.standard.string(forKey: "backendURL") ?? "http://localhost:8765"
+        let savedBackendURL = UserDefaults.standard.string(forKey: "backendURL") ?? defaultBackendURL
+        if savedBackendURL.contains("localhost") || savedBackendURL.contains("127.0.0.1") {
+            backendURL = defaultBackendURL
+            UserDefaults.standard.set(defaultBackendURL, forKey: "backendURL")
+        } else {
+            backendURL = savedBackendURL
+        }
         userName = UserDefaults.standard.string(forKey: "userName") ?? ""
         userEmail = UserDefaults.standard.string(forKey: "userEmail") ?? ""
         isAuthenticated = UserDefaults.standard.string(forKey: "authToken") != nil
@@ -113,14 +121,14 @@ struct BackendClient {
             let scheme = enteredURL.scheme,
             let host = enteredURL.host
         else {
-            return URL(string: "http://localhost:8765")!
+            return URL(string: defaultBackendURL)!
         }
 
         var components = URLComponents()
         components.scheme = scheme
         components.host = host
         components.port = enteredURL.port
-        return components.url ?? URL(string: "http://localhost:8765")!
+        return components.url ?? URL(string: defaultBackendURL)!
     }
 
     func authenticate(mode: AuthRoute, name: String, email: String, password: String) async throws -> AuthResponse {
@@ -371,7 +379,7 @@ final class ActivityMonitor: ObservableObject {
     private let motionManager = CMMotionManager()
     private let classifier = LinearSVMActivityClassifier()
     private var samples: [CMAcceleration] = []
-    private var backendURLString = "http://localhost:8765"
+    private var backendURLString = defaultBackendURL
     private var authToken: String?
     private var lastUploadTime = Date.distantPast
     private let windowSize = 24
