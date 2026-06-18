@@ -1,0 +1,9 @@
+.DS_Store
+.idea/
+DerivedData/
+DerivedDataDevice/
+*.xcuserstate
+device_build.log
+backend/__pycache__/
+backend/data/*.json
+!backend/data/.gitkeep

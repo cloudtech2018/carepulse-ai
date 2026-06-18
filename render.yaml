@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: carepulse-backend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 backend/server.py
+    envVars:
+      - key: CAREPULSE_DATA_PATH
+        value: /tmp/carepulse.json
