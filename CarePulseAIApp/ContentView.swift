@@ -108,7 +108,19 @@ struct BackendClient {
     let baseURLString: String
 
     private var baseURL: URL {
-        URL(string: baseURLString.trimmingCharacters(in: .whitespacesAndNewlines)) ?? URL(string: "http://localhost:8765")!
+        guard
+            let enteredURL = URL(string: baseURLString.trimmingCharacters(in: .whitespacesAndNewlines)),
+            let scheme = enteredURL.scheme,
+            let host = enteredURL.host
+        else {
+            return URL(string: "http://localhost:8765")!
+        }
+
+        var components = URLComponents()
+        components.scheme = scheme
+        components.host = host
+        components.port = enteredURL.port
+        return components.url ?? URL(string: "http://localhost:8765")!
     }
 
     func authenticate(mode: AuthRoute, name: String, email: String, password: String) async throws -> AuthResponse {
